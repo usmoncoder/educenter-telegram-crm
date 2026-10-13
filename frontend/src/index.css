@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* Design tokens: a school-board green frame, cool paper surfaces, notebook-ink blue for
+   actions and the red notebook margin line for anything overdue. */
+@theme {
+  --font-sans: "Onest Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-board: #1e3a33;
+  --color-board-700: #264a41;
+  --color-board-600: #2f5a4f;
+  --color-board-300: #9fbcb2;
+  --color-paper: #f6f8f7;
+  --color-surface: #ffffff;
+  --color-line: #dfe5e2;
+  --color-line-strong: #c7d1cc;
+  --color-ink: #18211e;
+  --color-ink-2: #46524d;
+  --color-ink-3: #6f7b76;
+  --color-rule: #d7e3f4; /* faint notebook ruling */
+
+  --color-action: #2350b8;
+  --color-action-600: #1c4299;
+  --color-action-50: #eaf0fb;
+
+  --color-margin: #c33a2c; /* overdue / destructive */
+  --color-margin-50: #fbecea;
+  --color-wait: #a86a12; /* waiting / warning */
+  --color-wait-50: #fbf3e4;
+  --color-calm: #2c7a56; /* ok / success */
+  --color-calm-50: #e7f3ec;
+
+  --radius-panel: 10px;
+  --radius-control: 7px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-size: 15px;
+    line-height: 1.5;
+    font-feature-settings: "tnum" 0;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-action);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The exercise-book (daftar) panel: ruled rows and a red margin line. */
+  .notebook {
+    position: relative;
+    background-color: var(--color-surface);
+  }
+  .notebook > li {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .notebook > li:last-child {
+    border-bottom: 0;
+  }
+  .notebook::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 40px;
+    width: 1.5px;
+    background: var(--color-margin);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+}

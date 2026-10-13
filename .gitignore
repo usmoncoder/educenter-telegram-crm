@@ -1,0 +1,40 @@
+# Secrets and credentials - never commit
+.env
+.env.*
+!.env.example
+*.session
+*.session-journal
+data/
+secrets/
+*.pem
+*.key
+
+# Backups and local databases
+backups/
+*.sql
+*.sql.gz
+*.dump
+*.sqlite3
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Logs and editors
+*.log
+logs/
+.DS_Store
+.idea/
+.vscode/
