@@ -170,7 +170,9 @@ async def update_campaign(db: AsyncSession, campaign_id: int, data: CampaignIn) 
     c.next_run_at = None
     await db.flush()
     db.expire(c)
-    return await _load(db, c.id)
+    # Use campaign_id (not c.id): c was just expired, so accessing c.id would trigger a
+    # synchronous lazy-load outside the async greenlet context (MissingGreenlet).
+    return await _load(db, campaign_id)
 
 
 def _require_confirmation(c: AnnouncementCampaign, confirm: bool) -> None:

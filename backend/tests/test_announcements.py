@@ -112,6 +112,26 @@ async def test_once_campaign_sends_each_group_once_and_completes(factory, settin
     assert len(gateway.sent) == 2
 
 
+async def test_update_campaign_reloads_without_greenlet_error(factory):
+    # Regression: update_campaign expires the row then reloads it; accessing c.id after
+    # expire used to trigger a sync lazy-load (MissingGreenlet). It must reload cleanly.
+    g1, g2 = await seed_groups(factory, 2)
+    cid = await make_campaign(factory, [g1], activate=False, texts={g1: "<i>eski</i>"})
+    async with transaction(factory) as s:
+        body = CampaignIn(
+            title="Yangilangan sarlavha",
+            default_text="<b>Yangi matn</b>",
+            schedule_type=ScheduleType.DAILY,
+            time_of_day="09:00",
+            targets=[TargetIn(group_id=g1), TargetIn(group_id=g2, custom_text="<i>maxsus</i>")],
+        )
+        updated = await svc.update_campaign(s, cid, body)
+        assert updated.id == cid
+        assert updated.title == "Yangilangan sarlavha"
+        assert updated.schedule_type == ScheduleType.DAILY
+        assert {t.group_id for t in updated.targets} == {g1, g2}
+
+
 async def test_concurrent_schedulers_do_not_double_send(factory, settings_cache, gateway):
     await set_runtime(factory, announcement_min_interval_seconds=1)
     ids = await seed_groups(factory, 6)

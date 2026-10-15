@@ -1,5 +1,6 @@
 // Russian translations — filled by the i18n conversion. Key = Uzbek source string.
 export const ru: Record<string, string> = {
+  "o'z vaqtida": "вовремя",
   // History.tsx
   "Holat": "Статус",
   "Urinishlar": "Попытки",
