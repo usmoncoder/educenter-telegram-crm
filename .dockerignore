@@ -1,0 +1,18 @@
+# Build-context excludes for the root Dockerfile (PaaS single-image build).
+.git
+.github
+**/node_modules
+**/dist
+**/.venv
+.venv
+**/__pycache__
+**/*.pyc
+.env
+.env.*
+!.env.example
+*.session
+*.session-journal
+data/session
+backups
+docs
+README.md

@@ -144,7 +144,38 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     for module in (health, auth, crm, config, announcements, admin):
         app.include_router(module.router, prefix="/api")
+
+    # Optionally serve the built SPA from the same origin (single-service PaaS deploys).
+    # On the Docker Compose setup this is unset and nginx serves the frontend instead.
+    _mount_frontend(app, settings)
     return app
+
+
+def _mount_frontend(app: FastAPI, settings: Settings) -> None:
+    from pathlib import Path
+
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    dist = settings.frontend_dist
+    if dist is None or not Path(dist).is_dir():
+        return
+    dist = Path(dist)
+    assets = dist / "assets"
+    if assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=assets), name="assets")
+
+    index = dist / "index.html"
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa(full_path: str) -> Response:
+        # API routes are matched first; anything else falls back to the SPA shell.
+        if full_path.startswith("api/") or full_path == "api":
+            return _error(404, "http_404", "Sahifa topilmadi")
+        candidate = (dist / full_path).resolve()
+        if full_path and candidate.is_file() and dist.resolve() in candidate.parents:
+            return FileResponse(candidate)
+        return FileResponse(index)
 
 
 app = create_app()

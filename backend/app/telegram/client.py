@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 
 from telethon import TelegramClient
+from telethon.sessions import StringSession
 
 from app.core.config import Settings
 
@@ -40,10 +41,17 @@ def session_file_exists(settings: Settings) -> bool:
 def build_client(settings: Settings, *, catch_up: bool = True) -> TelegramClient:
     if not settings.telegram_configured:
         raise RuntimeError("TELEGRAM_API_ID va TELEGRAM_API_HASH sozlanmagan")
-    secure_session_dir(settings)
     assert settings.telegram_api_hash is not None
+    # A StringSession (from env) wins over the on-disk file session: used on hosts without a
+    # persistent disk. Otherwise fall back to the standard SQLite file session on the volume.
+    session: str | StringSession
+    if settings.telegram_session_string is not None:
+        session = StringSession(settings.telegram_session_string.get_secret_value())
+    else:
+        secure_session_dir(settings)
+        session = str(settings.session_path)
     client = TelegramClient(
-        str(settings.session_path),
+        session,
         int(settings.telegram_api_id),  # type: ignore[arg-type]
         settings.telegram_api_hash.get_secret_value(),
         device_model=settings.telegram_device_model,

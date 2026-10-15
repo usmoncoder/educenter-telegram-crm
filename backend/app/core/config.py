@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     session_ttl_hours: int = 12
     cookie_secure: bool | None = None  # defaults to True in production
     trusted_proxy_count: int = 0  # number of reverse proxies in front of the API (X-Forwarded-For hops)
+    # Optional: directory of the built frontend (dist). When set, the API also serves the SPA
+    # from the same origin (used on single-service PaaS deploys). Empty on the Compose setup,
+    # where nginx serves the frontend instead.
+    frontend_dist: Path | None = None
 
     # Telegram (MTProto user account). Never exposed to the frontend.
     telegram_api_id: int | None = None
@@ -42,6 +46,10 @@ class Settings(BaseSettings):
     telegram_session_dir: Path = Path("./data/session")
     telegram_session_name: str = "educenter"
     telegram_device_model: str = "EduCenter CRM"
+    # Optional: a Telethon StringSession. When set (e.g. on a PaaS without a persistent disk),
+    # it is used instead of the on-disk session file. Treat it like the session file: full
+    # account access. Leave empty to use the file session (the default, Docker Compose path).
+    telegram_session_string: SecretStr | None = None
 
     # Optional Bot API token used only for administrator alerts when alert channel is "bot".
     alert_bot_token: SecretStr | None = None
