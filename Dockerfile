@@ -38,6 +38,7 @@ ENV TELEGRAM_SESSION_DIR=/data/session \
 
 USER app
 
-# Railway provides $PORT. The `app` service runs migrations then the API (which serves the SPA).
-# The `worker` service overrides this with: python -m app.workers.main
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips '*' --no-server-header"]
+# One image, two roles selected by RUN_MODE:
+#   RUN_MODE=worker  -> the Telegram worker (background jobs, no HTTP port)
+#   otherwise        -> run migrations, then the API (which also serves the SPA) on $PORT
+CMD ["sh", "-c", "if [ \"$RUN_MODE\" = worker ]; then exec python -m app.workers.main; else alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips '*' --no-server-header; fi"]
